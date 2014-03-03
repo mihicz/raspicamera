@@ -2,39 +2,62 @@
 
 #unalias date
 
-#DATE=$(date "+%Y.%m.%d_%H:%M")
-DATE=$(date "+%Y%m%d_%H%M")
-#DATE=$(date "+%Y")
+DATE=$(date -I)
 DIRECTORY=/home/pi/camera/timelapse_$DATE
-FILENAME=Image%04d
-FORMAT=png #png,bmp,jpg,gif
+#DIRECTORY=/home/pi/temp/timelapse_$DATE
+FORMAT=jpg #png,bmp,jpg,gif
+COUNT=0
 
 # check if DIRECTORY exist
-if [ -d "$DIRECTORY" ]; then 
-	echo "DIR exist"
-	exit 0; 
+if [ ! -d "$DIRECTORY" ]; then 
+	mkdir -p $DIRECTORY
 fi
-mkdir -p $DIRECTORY
 
 # max 2592x1944 px
-WIDTH=500
-HEIGHT=500
+WIDTH=750
+HEIGHT=750
+TIMEOUT=0s
+SETTINGS="-ev -2 -awb auto"
 
-# time in ms
-TIMELAPSE=10000 #10s, >6s
-#TIMELAPSE=30000 #30s, >6s
-#TIMELAPSE=60000 #1m, >6s
+# read exif information
+IMAGE_TEXT="%[EXIF:DateTimeOriginal]"
 
-#TIMEOUT=20000 #10s, >timelapse
-TIMEOUT=120000 #2m, >timelapse
-#TIMEOUT=900000 #15m, >timelapse
-#TIMEOUT=3600000 #1h, >timelapse
+# delay time
+TIMELAPSE=10s
+
+# calculate end time
+#END_TIME="2014-03-03 21:06:00"
+END_TIME=`date +%Y-%m-%d`\ "16:00:00"
+echo $END_TIME
+t1=`date --date="$END_TIME" +%s` # get seconds since epoch
+
+while true; do
+
+	# end condition
+	CUR_TIME=`date +%Y-%m-%d\ %H:%M:%S`
+	echo $CUR_TIME
+	t2=`date --date="$CUR_TIME" +%s`
+	if [ $t2 -ge $t1 ]; then
+		break;
+	fi
+
+	COUNT=$(( $COUNT+1 ));
+	FILENAME=Image_`printf %04d $COUNT`
+	FILE=$DIRECTORY/$FILENAME.$FORMAT 
+	echo $FILE
+
+	# take a picture
+	raspistill -o $FILE -e $FORMAT -w $WIDTH -h $HEIGHT -t $TIMEOUT $SETTINGS
+
+	# convert image
+#	convert $FILE \
+#		-auto-level \
+#		-fill white -undercolor '#000A' -pointsize 25 -annotate +1+745 "$IMAGE_TEXT" \
+#		$FILE
+
+	# wait
+	sleep $TIMELAPSE;
+done
 
 
-#raspistill -o img7.jpg -r -v -t 500 -w 200 -h 200 >&img7.log 2>&1
-#raspistill -o img20.png -e png -ex backlight -awb shade
-
-#raspistill -o Image%04d.png -e png -w $width -h $height -t $timeout -tl $timelapse
-#raspistill -o $DIRECTORY/$FILENAME.$FORMAT -e $FORMAT -w $WIDTH -h $HEIGHT -t $TIMEOUT -tl $TIMELAPSE -rot 180 -awb off
-raspistill -o $DIRECTORY/$FILENAME.$FORMAT -e $FORMAT -w $WIDTH -h $HEIGHT -t $TIMEOUT -tl $TIMELAPSE -awb off
 echo "done"
