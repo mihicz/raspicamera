@@ -39,11 +39,18 @@ HEIGHT=750
 # time in ms
 # time before takes picture
 # default 5s, min 30ms, 0 = wait forever
-TIMEOUT=500 #0.5s
+TIMEOUT=2000 #2s
 #SETTINGS="-ex fixedfps -awb off -ifx none"
-#SETTINGS="-awb off -ifx none"
+#SETTINGS="-awb off -ifx none" # obrazky blikaji
 #SETTINGS="-awb cloud -ifx none" # obrazky neblikaji, ale prilis svetle
-SETTINGS="-awb shade -ifx none"
+#SETTINGS="-awb shade -ifx none" # prilis svetle
+#SETTINGS="-sh 0 -co 0 -br 50 -sa 0 -ISO 100 -ev 0 -ex fixedfps -awb off -ifx none -ss 9000000" prilis svetle
+#SETTINGS="-sh 0 -co 0 -br 50 -sa 0 -ISO 100 -ev 0 -ex fixedfps -awb off -ifx none -ss 90000"
+#SETTINGS="-sh 0 -co 0 -br 50 -sa 0 -ISO 100 -ev 0 -ex fixedfps -awb off -ifx none -ss 9000"
+#SETTINGS="-sh 0 -co 0 -br 50 -sa 0 -ISO 100 -ev 0 -ex fixedfps -awb off -ifx none -ss 1000"
+#SETTINGS="-sh 0 -co 0 -br 50 -sa 0 -ISO 100 -ev 0 -ex fixedfps -awb off -ifx none"
+SETTINGS="-ev -2 -awb auto"
+#SETTINGS="-ev -2 -awb off"
 
 
 #raspistill -o img7.jpg -r -v -t 500 -w 200 -h 200 >&img7.log 2>&1
@@ -53,14 +60,17 @@ SETTINGS="-awb shade -ifx none"
 
 raspistill -o $FILE -e $FORMAT -w $WIDTH -h $HEIGHT -t $TIMEOUT $SETTINGS
 
-# *** INSERT TIMESTAMP TO IMAGE ***
+# *** CONVERT IMAGE ***
+# - adjust color levers of image
+# - insert timestamp to image
 
 # see http://www.imagemagick.org/script/escape.php
 #identify -format "$[EXIF:*]" Image.jpg
 IMAGE_TEXT="%[EXIF:DateTimeOriginal]"
+
 convert $FILE \
-	-fill white -undercolor '#000A' \
-	-pointsize 25 -annotate +1+21 "$IMAGE_TEXT" \
+	-auto-level \
+	-fill white -undercolor '#000A' -pointsize 25 -annotate +1+745 "$IMAGE_TEXT" \
 	$FILE
 
 echo "done"
