@@ -1,6 +1,25 @@
 #!/bin/bash
 
-#unalias date
+#TODO: unalias date
+
+if [ -z "$1" -o "$1" = " " ]; then
+	echo "Input value is null or space!"
+	exit 1
+fi
+
+# calculate end time
+#END_TIME="2014-03-03 21:06:00"
+#END_TIME=`date +%Y-%m-%d`\ "18:00:00"
+END_TIME=`date +%Y-%m-%d`\ "$1"
+# get seconds since epoch
+t1=`date --date="$END_TIME" +%s` || {
+	echo "Wrong input value!"
+	exit 1
+}
+echo $END_TIME
+echo $t1
+
+
 
 DATE=$(date -I)
 DIRECTORY=/home/pi/camera/timelapse_$DATE
@@ -16,27 +35,23 @@ fi
 # max 2592x1944 px
 WIDTH=750
 HEIGHT=750
-TIMEOUT=0s
+TIMEOUT=1s # must be integer and > 0
 SETTINGS="-ev -2 -awb auto"
 
 # read exif information
 IMAGE_TEXT="%[EXIF:DateTimeOriginal]"
 
 # delay time
-TIMELAPSE=10s
+TIMELAPSE=9s
 
-# calculate end time
-#END_TIME="2014-03-03 21:06:00"
-END_TIME=`date +%Y-%m-%d`\ "16:00:00"
-echo $END_TIME
-t1=`date --date="$END_TIME" +%s` # get seconds since epoch
 
 while true; do
 
 	# end condition
 	CUR_TIME=`date +%Y-%m-%d\ %H:%M:%S`
-	echo $CUR_TIME
 	t2=`date --date="$CUR_TIME" +%s`
+	echo $CUR_TIME
+	echo $t2
 	if [ $t2 -ge $t1 ]; then
 		break;
 	fi
@@ -47,7 +62,8 @@ while true; do
 	echo $FILE
 
 	# take a picture
-	raspistill -o $FILE -e $FORMAT -w $WIDTH -h $HEIGHT -t $TIMEOUT $SETTINGS
+#	raspistill -o $FILE -e $FORMAT -w $WIDTH -h $HEIGHT -t $TIMEOUT $SETTINGS
+	touch $FILE
 
 	# convert image
 #	convert $FILE \
