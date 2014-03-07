@@ -35,14 +35,14 @@ fi
 # max 2592x1944 px
 WIDTH=750
 HEIGHT=750
-TIMEOUT=1s # must be integer and > 0
-SETTINGS="-ev -2 -awb auto"
+TIMEOUT=1 # in ms, must be integer and > 0
+SETTINGS="-ev -2 -awb auto" # try raw without awb?
 
 # read exif information
 IMAGE_TEXT="%[EXIF:DateTimeOriginal]"
 
 # delay time
-TIMELAPSE=9s
+TIMELAPSE=10s
 
 
 while true; do
@@ -62,8 +62,8 @@ while true; do
 	echo $FILE
 
 	# take a picture
-#	raspistill -o $FILE -e $FORMAT -w $WIDTH -h $HEIGHT -t $TIMEOUT $SETTINGS
-	touch $FILE
+	raspistill -o $FILE -e $FORMAT -w $WIDTH -h $HEIGHT -t $TIMEOUT $SETTINGS
+#	touch $FILE # for testting
 
 	# convert image
 #	convert $FILE \
