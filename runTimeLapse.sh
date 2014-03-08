@@ -35,7 +35,7 @@ fi
 # max 2592x1944 px
 WIDTH=750
 HEIGHT=750
-TIMEOUT=1 # in ms, must be integer and > 0
+TIMEOUT=500 # in ms, must be integer and > 0
 SETTINGS="-ev -2 -awb auto" # try raw without awb?
 
 # read exif information
@@ -66,14 +66,15 @@ while true; do
 #	touch $FILE # for testting
 
 	# convert image
-#	convert $FILE \
-#		-auto-level \
-#		-fill white -undercolor '#000A' -pointsize 25 -annotate +1+745 "$IMAGE_TEXT" \
-#		$FILE
+	convert $FILE \
+		-auto-level \
+		-fill white -undercolor '#000A' -pointsize 25 -annotate +1+745 "$IMAGE_TEXT" \
+		$FILE
 
 	# wait
 	sleep $TIMELAPSE;
 done
 
+avconv -r 10 -i $DIRECTORY/Image_%04d.$FORMAT -r 10 -vcodec libx264 -crf 20 -g 15 $DIRECTORY/video_$DATE.mp4
 
 echo "done"
